@@ -39,6 +39,17 @@ async def download_file(g_recaptcha_response = Query(..., alias="g-recaptcha-res
     else:
         raise HTTPException(status_code=400, detail="reCAPTCHA verification failed. Please try again.")
 
+@app.get("/download2")
+async def download2_file():
+
+    file_path = Path("./sample-text-file.txt")
+
+    if not file_path.is_file():
+        raise HTTPException(status_code=404, detail="File not found")
+
+    return FileResponse(path=file_path, filename="sample-text-file.txt")
+
+
 if __name__ == "__main__":
     import uvicorn
 
