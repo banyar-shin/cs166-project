@@ -4,10 +4,14 @@
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   </head>
   <body>
-    <form action="/download" method="GET">
+    <form action="/download_with_captcha" method="GET">
       <div class="g-recaptcha" data-sitekey="6LcBw48qAAAAAJEDNg2skl8Tyj07aCuNO-8iovJq"></div>
       <br/>
-      <input type="submit" value="Submit">
+      <input type="submit" value="Download w/ CAPTCHA">
+    </form>
+
+    <form action="/download_without_captcha" method="GET">
+      <input type="submit" value="Download w/o CAPTCHA">
     </form>
   </body>
 </html>

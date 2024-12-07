@@ -17,7 +17,7 @@ security = HTTPBasic()
 async def download_button():
     return FileResponse("./index.html")
 
-@app.get("/download")
+@app.get("/download_with_captcha")
 async def download_file(g_recaptcha_response = Query(..., alias="g-recaptcha-response")):
 
     # Create body for captcha verification
@@ -39,7 +39,7 @@ async def download_file(g_recaptcha_response = Query(..., alias="g-recaptcha-res
     else:
         raise HTTPException(status_code=400, detail="reCAPTCHA verification failed. Please try again.")
 
-@app.get("/download2")
+@app.get("/download_without_captcha")
 async def download2_file():
 
     file_path = Path("./sample-text-file.txt")
