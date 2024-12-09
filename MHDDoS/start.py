@@ -742,7 +742,7 @@ class HttpFlood(Thread):
                 'Mozilla/5.0 (Linux; U; Android 2.3.4; fr-fr; HTC Desire Build/GRJ22) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1',
                 'Mozilla/5.0 (Linux; U; Android 2.3.4; en-us; T-Mobile myTouch 3G Slide Build/GRI40) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1',
                 'Mozilla/5.0 (Linux; U; Android 2.3.3; zh-tw; HTC_Pyramid Build/GRI40) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1',
-                'Mozilla/5.0 (Linux; U; Android 2.3.3; zh-tw; HTC_Pyramid Build/GRI40) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari',
+                'Mozilla/5.0 (Linux; U; Android 2.3.3; zh-tw; HTC_Pyramid Build/GRI40) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile',
                 'Mozilla/5.0 (Linux; U; Android 2.3.3; zh-tw; HTC Pyramid Build/GRI40) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1',
                 'Mozilla/5.0 (Linux; U; Android 2.3.3; ko-kr; LG-LU3000 Build/GRI40) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1',
                 'Mozilla/5.0 (Linux; U; Android 2.3.3; en-us; HTC_DesireS_S510e Build/GRI40) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1',
@@ -1194,6 +1194,7 @@ class HttpFlood(Thread):
             'Without proxies you can use github.com/codesenberg/bombardier'
 
         while True:
+            Thread(target=log_packet_rate, daemon=True).start()
             proxy = randchoice(self._proxies)
             if proxy.type != ProxyType.SOCKS4:
                 break
@@ -1544,6 +1545,15 @@ def handleProxyList(con, proxy_li, proxy_ty, url=None):
 
     return proxies
 
+def log_packet_rate():
+    while event.is_set():
+        sleep(0.01)
+        timestamp = time()
+        pps = int(REQUESTS_SENT)
+        bps = int(BYTES_SEND)
+        logger.info(f"[{timestamp}] PPS: {pps*1000}, BPS: {bps*1000}")
+        REQUESTS_SENT.set(0)
+        BYTES_SEND.set(0)
 
 if __name__ == '__main__':
     with suppress(KeyboardInterrupt):
@@ -1709,6 +1719,7 @@ if __name__ == '__main__':
                 f"{bcolors.WARNING}Attack Started to{bcolors.OKBLUE} %s{bcolors.WARNING} with{bcolors.OKBLUE} %s{bcolors.WARNING} method for{bcolors.OKBLUE} %s{bcolors.WARNING} seconds, threads:{bcolors.OKBLUE} %d{bcolors.WARNING}!{bcolors.RESET}"
                 % (target or url.host, method, timer, threads))
             event.set()
+            Thread(target=log_packet_rate, daemon=True).start()
             ts = time()
             while time() < ts + timer:
                 logger.debug(
@@ -1719,8 +1730,6 @@ if __name__ == '__main__':
                      Tools.humanformat(int(REQUESTS_SENT)),
                      Tools.humanbytes(int(BYTES_SEND)),
                      round((time() - ts) / timer * 100, 2)))
-                REQUESTS_SENT.set(0)
-                BYTES_SEND.set(0)
                 sleep(1)
 
             event.clear()
